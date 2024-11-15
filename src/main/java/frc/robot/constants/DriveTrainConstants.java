@@ -30,11 +30,11 @@ public class DriveTrainConstants {
      * TODO: for REV chassis, replace them with actual numbers
      * */
     public static final double
-            WHEEL_RADIUS_METERS = Units.inchesToMeters(TunerConstants.kWheelRadiusInches),
-            DRIVE_GEAR_RATIO = TunerConstants.kDriveGearRatio,
-            STEER_GEAR_RATIO = TunerConstants.kSteerGearRatio,
-            STEER_FRICTION_VOLTAGE = TunerConstants.kSteerFrictionVoltage,
-            DRIVE_FRICTION_VOLTAGE = TunerConstants.kDriveFrictionVoltage,
+            WHEEL_RADIUS_METERS = Units.inchesToMeters(2),
+            DRIVE_GEAR_RATIO = 5.9,
+            STEER_GEAR_RATIO = 21,
+            STEER_FRICTION_VOLTAGE = 0.15,
+            DRIVE_FRICTION_VOLTAGE = 0.2,
             STEER_INERTIA = 0.025;
 
     /* adjust current limit */
