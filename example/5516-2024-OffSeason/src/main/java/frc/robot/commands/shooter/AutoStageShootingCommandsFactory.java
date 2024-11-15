@@ -1,5 +1,7 @@
 package frc.robot.commands.shooter;
 
+import static frc.robot.utils.MaplePathPlannerLoader.*;
+
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.path.PathPlannerPath;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -16,20 +18,29 @@ import frc.robot.subsystems.led.LEDStatusLight;
 import frc.robot.subsystems.shooter.FlyWheels;
 import frc.robot.subsystems.shooter.Pitch;
 import frc.robot.utils.MapleShooterOptimization;
-
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
-
-import static frc.robot.utils.MaplePathPlannerLoader.*;
 
 public class AutoStageShootingCommandsFactory {
     public static final double PATH_ALMOST_FINISHED_METERS = 0.8,
             PRECISE_ALIGNMENT_SPEED_CONSTRAIN_MPS = 1.5,
-            SHOOTING_VELOCITY_LIMIT_MPS = 0.7, SHOOTING_ANGULAR_VELOCITY_LIMIT = Math.toRadians(20);
+            SHOOTING_VELOCITY_LIMIT_MPS = 0.7,
+            SHOOTING_ANGULAR_VELOCITY_LIMIT = Math.toRadians(20);
     public static final Pose2d PRECISE_ALIGNMENT_TOLERANCE = new Pose2d(0.1, 0.1, Rotation2d.fromDegrees(3));
 
-    public static Command followPathGrabAndShoot(PathPlannerPath pathAtBlueAlliance, HolonomicDriveSubsystem driveSubsystem, Intake intake, Pitch pitch, FlyWheels flyWheels, MapleShooterOptimization shooterOptimization, LEDStatusLight statusLight, boolean grabNoteAtShootingPosition) {
-        final Supplier<Translation2d> scoringPositionSupplier = () -> getEndingRobotPoseInCurrentAllianceSupplier(pathAtBlueAlliance).get().getTranslation();
+    public static Command followPathGrabAndShoot(
+            PathPlannerPath pathAtBlueAlliance,
+            HolonomicDriveSubsystem driveSubsystem,
+            Intake intake,
+            Pitch pitch,
+            FlyWheels flyWheels,
+            MapleShooterOptimization shooterOptimization,
+            LEDStatusLight statusLight,
+            boolean grabNoteAtShootingPosition) {
+        final Supplier<Translation2d> scoringPositionSupplier =
+                () -> getEndingRobotPoseInCurrentAllianceSupplier(pathAtBlueAlliance)
+                        .get()
+                        .getTranslation();
         final Command followPathUntilAlmostFinished = AutoBuilder.followPath(pathAtBlueAlliance)
                 .until(() -> pathAlmostFinish(pathAtBlueAlliance, driveSubsystem.getPose()));
         final Supplier<Pose2d> preciseAlignmentTarget = () -> new Pose2d(
@@ -37,32 +48,30 @@ public class AutoStageShootingCommandsFactory {
                 shooterOptimization.getShooterFacing(
                         FieldConstants.SPEAKER_POSITION_SUPPLIER.get(),
                         scoringPositionSupplier.get(),
-                        new ChassisSpeeds())
-        );
+                        new ChassisSpeeds()));
         final Command preciseAlignment = new DriveToPose(
                 driveSubsystem,
                 preciseAlignmentTarget,
                 new Pose2d(0, 0, Rotation2d.fromDegrees(0)),
-                PRECISE_ALIGNMENT_SPEED_CONSTRAIN_MPS
-        );
+                PRECISE_ALIGNMENT_SPEED_CONSTRAIN_MPS);
         final BooleanSupplier robotScoringPoseReached = () -> preciseAlignmentFinished(
                 preciseAlignmentTarget.get(),
                 driveSubsystem.getPose(),
-                driveSubsystem.getMeasuredChassisSpeedsRobotRelative()
-        );
+                driveSubsystem.getMeasuredChassisSpeedsRobotRelative());
 
         final PrepareToAim prepareToAim = new PrepareToAim(
-                flyWheels, pitch, shooterOptimization, statusLight,
+                flyWheels,
+                pitch,
+                shooterOptimization,
+                statusLight,
                 scoringPositionSupplier,
-                FieldConstants.SPEAKER_POSITION_SUPPLIER
-        );
+                FieldConstants.SPEAKER_POSITION_SUPPLIER);
 
-        final Command intakeNoteDuringBeforeAimSuccess = grabNoteAtShootingPosition ?
-                intake.executeIntakeNote().onlyIf(() -> !intake.isNotePresent())
-                :Commands.none();
-        final Command pushNoteUpwardsAfterAimSuccess = grabNoteAtShootingPosition ?
-                Commands.run(intake::runFullIntakeVoltage, intake)
-                        .until(intake::isNoteTouchingIntake)
+        final Command intakeNoteDuringBeforeAimSuccess = grabNoteAtShootingPosition
+                ? intake.executeIntakeNote().onlyIf(() -> !intake.isNotePresent())
+                : Commands.none();
+        final Command pushNoteUpwardsAfterAimSuccess = grabNoteAtShootingPosition
+                ? Commands.run(intake::runFullIntakeVoltage, intake).until(intake::isNoteTouchingIntake)
                 : Commands.none();
         final Command shootNoteAfterAimSuccess = pushNoteUpwardsAfterAimSuccess
                 .andThen(Commands.run(intake::runFullIntakeVoltage, intake).until(() -> !intake.isNotePresent()))
@@ -77,16 +86,21 @@ public class AutoStageShootingCommandsFactory {
     }
 
     private static boolean pathAlmostFinish(PathPlannerPath pathAtBlueAlliance, Pose2d currentPose) {
-        final Pose2d endingPose = getEndingRobotPoseInCurrentAllianceSupplier(pathAtBlueAlliance).get();
+        final Pose2d endingPose =
+                getEndingRobotPoseInCurrentAllianceSupplier(pathAtBlueAlliance).get();
         final double distanceToTarget = currentPose.getTranslation().getDistance(endingPose.getTranslation());
-        return  distanceToTarget < PATH_ALMOST_FINISHED_METERS;
+        return distanceToTarget < PATH_ALMOST_FINISHED_METERS;
     }
 
-    private static boolean preciseAlignmentFinished(Pose2d desiredPose, Pose2d currentPose, ChassisSpeeds currentSpeeds) {
+    private static boolean preciseAlignmentFinished(
+            Pose2d desiredPose, Pose2d currentPose, ChassisSpeeds currentSpeeds) {
         return Math.abs(desiredPose.getX() - currentPose.getX()) < PRECISE_ALIGNMENT_TOLERANCE.getX()
-                &&  Math.abs(desiredPose.getY() - currentPose.getY()) < PRECISE_ALIGNMENT_TOLERANCE.getY()
-                && Math.abs(desiredPose.getRotation().getDegrees() - currentPose.getRotation().getDegrees()) < PRECISE_ALIGNMENT_TOLERANCE.getRotation().getDegrees()
-                && Math.hypot(currentSpeeds.vxMetersPerSecond, currentSpeeds.vyMetersPerSecond) < SHOOTING_VELOCITY_LIMIT_MPS
+                && Math.abs(desiredPose.getY() - currentPose.getY()) < PRECISE_ALIGNMENT_TOLERANCE.getY()
+                && Math.abs(desiredPose.getRotation().getDegrees()
+                                - currentPose.getRotation().getDegrees())
+                        < PRECISE_ALIGNMENT_TOLERANCE.getRotation().getDegrees()
+                && Math.hypot(currentSpeeds.vxMetersPerSecond, currentSpeeds.vyMetersPerSecond)
+                        < SHOOTING_VELOCITY_LIMIT_MPS
                 && Math.abs(currentSpeeds.omegaRadiansPerSecond) < SHOOTING_ANGULAR_VELOCITY_LIMIT;
     }
 }

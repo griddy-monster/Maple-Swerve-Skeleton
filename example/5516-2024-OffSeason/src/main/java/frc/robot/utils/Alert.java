@@ -11,14 +11,11 @@ import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import org.littletonrobotics.junction.Logger;
-
 import java.util.*;
 import java.util.function.Predicate;
+import org.littletonrobotics.junction.Logger;
 
-/**
- * Class for managing persistent alerts to be sent over NetworkTables.
- */
+/** Class for managing persistent alerts to be sent over NetworkTables. */
 public class Alert {
     private static Map<String, SendableAlerts> groups = new HashMap<String, SendableAlerts>();
 
@@ -28,8 +25,8 @@ public class Alert {
     private String text;
 
     /**
-     * Creates a new Alert in the default group - "Alerts". If this is the first to be instantiated,
-     * the appropriate entries will be added to NetworkTables.
+     * Creates a new Alert in the default group - "Alerts". If this is the first to be instantiated, the appropriate
+     * entries will be added to NetworkTables.
      *
      * @param text Text to be displayed when the alert is active.
      * @param type Alert level specifying urgency.
@@ -39,12 +36,12 @@ public class Alert {
     }
 
     /**
-     * Creates a new Alert. If this is the first to be instantiated in its group, the appropriate
-     * entries will be added to NetworkTables.
+     * Creates a new Alert. If this is the first to be instantiated in its group, the appropriate entries will be added
+     * to NetworkTables.
      *
      * @param group Group identifier, also used as NetworkTables title
-     * @param text  Text to be displayed when the alert is active.
-     * @param type  Alert level specifying urgency.
+     * @param text Text to be displayed when the alert is active.
+     * @param type Alert level specifying urgency.
      */
     public Alert(String group, String text, AlertType type) {
         if (!groups.containsKey(group)) {
@@ -58,8 +55,8 @@ public class Alert {
     }
 
     /**
-     * Sets whether the alert should currently be displayed. When activated, the alert text will also
-     * be sent to the console.
+     * Sets whether the alert should currently be displayed. When activated, the alert text will also be sent to the
+     * console.
      */
     public void setActivated(boolean active) {
         if (active && !this.active) {
@@ -79,9 +76,7 @@ public class Alert {
         this.active = active;
     }
 
-    /**
-     * Updates current alert text.
-     */
+    /** Updates current alert text. */
     public void setText(String text) {
         if (active && !text.equals(this.text)) {
             switch (type) {
@@ -104,8 +99,7 @@ public class Alert {
 
         public String[] getStrings(AlertType type) {
             Predicate<Alert> activeFilter = (Alert x) -> x.type == type && x.active;
-            Comparator<Alert> timeSorter =
-                    (Alert a1, Alert a2) -> (int) (a2.activeStartTime - a1.activeStartTime);
+            Comparator<Alert> timeSorter = (Alert a1, Alert a2) -> (int) (a2.activeStartTime - a1.activeStartTime);
             return alerts.stream()
                     .filter(activeFilter)
                     .sorted(timeSorter)
@@ -122,28 +116,24 @@ public class Alert {
         }
     }
 
-    /**
-     * Represents an alert's level of urgency.
-     */
+    /** Represents an alert's level of urgency. */
     public enum AlertType {
         /**
-         * High priority alert - displayed first on the dashboard with a red "X" symbol. Use this type
-         * for problems which will seriously affect the robot's functionality and thus require immediate
-         * attention.
+         * High priority alert - displayed first on the dashboard with a red "X" symbol. Use this type for problems
+         * which will seriously affect the robot's functionality and thus require immediate attention.
          */
         ERROR,
 
         /**
-         * Medium priority alert - displayed second on the dashboard with a yellow "!" symbol. Use this
-         * type for problems which could affect the robot's functionality but do not necessarily require
-         * immediate attention.
+         * Medium priority alert - displayed second on the dashboard with a yellow "!" symbol. Use this type for
+         * problems which could affect the robot's functionality but do not necessarily require immediate attention.
          */
         WARNING,
 
         /**
-         * Low priority alert - displayed last on the dashboard with a green "i" symbol. Use this type
-         * for problems which are unlikely to affect the robot's functionality, or any other alerts
-         * which do not fall under "ERROR" or "WARNING".
+         * Low priority alert - displayed last on the dashboard with a green "i" symbol. Use this type for problems
+         * which are unlikely to affect the robot's functionality, or any other alerts which do not fall under "ERROR"
+         * or "WARNING".
          */
         INFO
     }

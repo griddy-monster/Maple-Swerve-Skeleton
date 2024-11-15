@@ -7,9 +7,8 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.RobotContainer;
-import org.json.simple.parser.ParseException;
-
 import java.io.IOException;
+import org.json.simple.parser.ParseException;
 
 public class ExampleCustomAutoWithPathPlannerTrajectories implements Auto {
     @Override

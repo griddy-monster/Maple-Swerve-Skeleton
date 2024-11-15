@@ -2,7 +2,6 @@
 package frc.robot.utils.CustomConfigs;
 
 import edu.wpi.first.wpilibj.Filesystem;
-
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -14,7 +13,6 @@ import java.util.List;
 import java.util.Map;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -47,6 +45,7 @@ public class MapleConfigFile {
         public boolean hasStringConfig(String name) {
             return stringConfigs.containsKey(name);
         }
+
         public double getDoubleConfig(String name) throws NullPointerException {
             if (!hasDoubleConfig(name))
                 throw new NullPointerException(
@@ -70,36 +69,33 @@ public class MapleConfigFile {
 
         public void putDoubleConfig(String configName, double value) throws IllegalArgumentException {
             if (intConfigs.containsKey(configName) || stringConfigs.containsKey(configName))
-                throw new IllegalArgumentException(
-                        "Cannot put double config '"
-                                + configName
-                                + "' to block '"
-                                + blockName
-                                + "' since there is already an int or string config with the same name");
+                throw new IllegalArgumentException("Cannot put double config '"
+                        + configName
+                        + "' to block '"
+                        + blockName
+                        + "' since there is already an int or string config with the same name");
             configOrders.add(configName);
             doubleConfigs.put(configName, value);
         }
 
         public void putIntConfig(String configName, int value) throws IllegalArgumentException {
             if (doubleConfigs.containsKey(configName) || stringConfigs.containsKey(configName))
-                throw new IllegalArgumentException(
-                        "Cannot put int config '"
-                                + configName
-                                + "' to block '"
-                                + blockName
-                                + "' since there is already a double or string config with the same name");
+                throw new IllegalArgumentException("Cannot put int config '"
+                        + configName
+                        + "' to block '"
+                        + blockName
+                        + "' since there is already a double or string config with the same name");
             configOrders.add(configName);
             intConfigs.put(configName, value);
         }
 
         public void putStringConfig(String configName, String value) throws IllegalArgumentException {
             if (doubleConfigs.containsKey(configName) || intConfigs.containsKey(configName))
-                throw new IllegalArgumentException(
-                        "Cannot put string config '"
-                                + configName
-                                + "' to block '"
-                                + blockName
-                                + "' since there is already a double or int config with the same name");
+                throw new IllegalArgumentException("Cannot put string config '"
+                        + configName
+                        + "' to block '"
+                        + blockName
+                        + "' since there is already a double or int config with the same name");
             configOrders.add(configName);
             stringConfigs.put(configName, value);
         }
@@ -130,8 +126,7 @@ public class MapleConfigFile {
         MapleConfigFile configFile = new MapleConfigFile(configType, configName);
 
         final Path xmlFilePath =
-                Paths.get(
-                        Filesystem.getDeployDirectory().getPath(), "configs", configType, configName + ".xml");
+                Paths.get(Filesystem.getDeployDirectory().getPath(), "configs", configType, configName + ".xml");
         File xmlFile = xmlFilePath.toFile();
         if (!xmlFile.exists()) {
             throw new IOException("Config file does not exist: " + xmlFilePath);
@@ -232,13 +227,10 @@ public class MapleConfigFile {
     }
 
     private static void writeSingleConfigBlock(ConfigBlock block, FileWriter writer) throws IOException {
-        for (String configName:block.configOrders) {
-            if (block.hasStringConfig(configName))
-                writeStringConfig(block, configName, writer);
-            else if (block.hasIntConfig(configName))
-                writeIntConfig(block, configName, writer);
-            else if (block.hasDoubleConfig(configName))
-                writeDoubleConfig(block, configName, writer);
+        for (String configName : block.configOrders) {
+            if (block.hasStringConfig(configName)) writeStringConfig(block, configName, writer);
+            else if (block.hasIntConfig(configName)) writeIntConfig(block, configName, writer);
+            else if (block.hasDoubleConfig(configName)) writeDoubleConfig(block, configName, writer);
         }
     }
 
@@ -249,8 +241,7 @@ public class MapleConfigFile {
                 + block.getDoubleConfig(configName)
                 + "</"
                 + configName
-                + ">\n"
-        );
+                + ">\n");
     }
 
     private static void writeStringConfig(ConfigBlock block, String configName, FileWriter writer) throws IOException {
@@ -260,8 +251,7 @@ public class MapleConfigFile {
                 + block.getStringConfig(configName)
                 + "</"
                 + configName
-                + ">\n"
-        );
+                + ">\n");
     }
 
     private static void writeIntConfig(ConfigBlock block, String configName, FileWriter writer) throws IOException {
@@ -271,7 +261,6 @@ public class MapleConfigFile {
                 + block.getIntConfig(configName)
                 + "</"
                 + configName
-                + ">\n"
-        );
+                + ">\n");
     }
 }

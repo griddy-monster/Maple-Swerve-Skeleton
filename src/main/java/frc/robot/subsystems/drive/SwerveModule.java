@@ -1,8 +1,12 @@
 // Original Source:
-// https://github.com/Mechanical-Advantage/AdvantageKit/tree/main/example_projects/advanced_swerve_drive/src/main, Copyright 2021-2024 FRC 6328
+// https://github.com/Mechanical-Advantage/AdvantageKit/tree/main/example_projects/advanced_swerve_drive/src/main,
+// Copyright 2021-2024 FRC 6328
 // Modified by 5516 Iron Maple https://github.com/Shenzhen-Robotics-Alliance/
 
 package frc.robot.subsystems.drive;
+
+import static edu.wpi.first.units.Units.Meters;
+import static frc.robot.constants.DriveControlLoops.*;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -19,8 +23,6 @@ import frc.robot.utils.CustomMaths.SwerveStateProjection;
 import frc.robot.utils.CustomPIDs.MaplePIDController;
 import org.littletonrobotics.junction.Logger;
 
-import static frc.robot.constants.DriveControlLoops.*;
-
 public class SwerveModule extends MapleSubsystem {
     private final ModuleIO io;
     private final String name;
@@ -28,7 +30,7 @@ public class SwerveModule extends MapleSubsystem {
 
     private final PIDController turnCloseLoop, driveCloseLoop;
     private SwerveModuleState setPoint;
-    private SwerveModulePosition[] odometryPositions = new SwerveModulePosition[]{};
+    private SwerveModulePosition[] odometryPositions = new SwerveModulePosition[] {};
 
     private final Alert hardwareFaultAlert;
 
@@ -36,10 +38,7 @@ public class SwerveModule extends MapleSubsystem {
         super("Module-" + name);
         this.io = io;
         this.name = name;
-        this.hardwareFaultAlert = new Alert(
-                "Module-" + name + " Hardware Fault",
-                Alert.AlertType.ERROR
-        );
+        this.hardwareFaultAlert = new Alert("Module-" + name + " Hardware Fault", Alert.AlertType.ERROR);
         this.hardwareFaultAlert.setActivated(false);
 
         turnCloseLoop = new MaplePIDController(STEER_CLOSE_LOOP);
@@ -80,22 +79,18 @@ public class SwerveModule extends MapleSubsystem {
 
     private void runDriveControlLoop() {
         final double adjustSpeedSetpointMetersPerSec = SwerveStateProjection.project(setPoint, getSteerFacing());
-        io.setDriveVoltage(
-                DRIVE_OPEN_LOOP.calculate(adjustSpeedSetpointMetersPerSec)
-                + driveCloseLoop.calculate(getDriveVelocityMetersPerSec(), adjustSpeedSetpointMetersPerSec)
-        );
+        io.setDriveVoltage(DRIVE_OPEN_LOOP.calculate(adjustSpeedSetpointMetersPerSec)
+                + driveCloseLoop.calculate(getDriveVelocityMetersPerSec(), adjustSpeedSetpointMetersPerSec));
     }
 
-    /**
-     * Runs the module with the specified setpoint state. Returns the optimized state.
-     */
+    /** Runs the module with the specified setpoint state. Returns the optimized state. */
     public SwerveModuleState runSetPoint(SwerveModuleState state) {
         this.setPoint = SwerveModuleState.optimize(state, getSteerFacing());
 
-        if (Math.abs(state.speedMetersPerSecond) < 0.04) {
+        if (Math.abs(state.speedMetersPerSecond) < 0.01) {
             io.setDriveVoltage(0);
             io.setSteerPowerPercent(0);
-            return this.getMeasuredState();
+            return this.setPoint = new SwerveModuleState();
         }
         runDriveControlLoop();
         runSteerCloseLoop();
@@ -109,9 +104,7 @@ public class SwerveModule extends MapleSubsystem {
         io.setDriveVoltage(0);
     }
 
-    /**
-     * Returns the current turn angle of the module.
-     */
+    /** Returns the current turn angle of the module. */
     public Rotation2d getSteerFacing() {
         return inputs.steerFacing;
     }
@@ -120,41 +113,31 @@ public class SwerveModule extends MapleSubsystem {
         return inputs.steerVelocityRadPerSec;
     }
 
-    /**
-     * Returns the current drive position of the module in meters.
-     */
+    /** Returns the current drive position of the module in meters. */
     public double getDrivePositionMeters() {
         return driveWheelRevolutionsToMeters(inputs.driveWheelFinalRevolutions);
     }
 
     private double driveWheelRevolutionsToMeters(double driveWheelRevolutions) {
-        return Units.rotationsToRadians(driveWheelRevolutions) * DriveTrainConstants.WHEEL_RADIUS_METERS;
+        return Units.rotationsToRadians(driveWheelRevolutions) * DriveTrainConstants.WHEEL_RADIUS.in(Meters);
     }
 
-    /**
-     * Returns the current drive velocity of the module in meters per second.
-     */
+    /** Returns the current drive velocity of the module in meters per second. */
     public double getDriveVelocityMetersPerSec() {
         return driveWheelRevolutionsToMeters(inputs.driveWheelFinalVelocityRevolutionsPerSec);
     }
 
-    /**
-     * Returns the module position (turn angle and drive position).
-     */
+    /** Returns the module position (turn angle and drive position). */
     public SwerveModulePosition getLatestPosition() {
         return new SwerveModulePosition(getDrivePositionMeters(), getSteerFacing());
     }
 
-    /**
-     * Returns the module state (turn angle and drive velocity).
-     */
+    /** Returns the module state (turn angle and drive velocity). */
     public SwerveModuleState getMeasuredState() {
         return new SwerveModuleState(getDriveVelocityMetersPerSec(), getSteerFacing());
     }
 
-    /**
-     * Returns the module positions received this cycle.
-     */
+    /** Returns the module positions received this cycle. */
     public SwerveModulePosition[] getOdometryPositions() {
         return odometryPositions;
     }
