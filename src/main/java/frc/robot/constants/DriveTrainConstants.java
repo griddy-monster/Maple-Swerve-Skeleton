@@ -16,8 +16,34 @@ import org.ironmaple.simulation.drivesims.GyroSimulation;
  * are required to be considerably precise
  */
 public class DriveTrainConstants {
-    /** numbers that needs to be changed to fit each robot TODO: change these numbers to match your robot */
-    public static final double WHEEL_COEFFICIENT_OF_FRICTION = 1.2;
+
+    /**
+     * numbers that needs to be changed to fit each robot
+     * TODO: change these numbers to match your robot
+     *  */
+    public static final double
+            WHEEL_COEFFICIENT_OF_FRICTION = 1.25, // 1.15 for tire wheels
+            ROBOT_MASS_KG = 40; // robot weight with bumpers
+
+    /**
+     *  TODO: change motor type to match your robot
+     *  */
+    public static final DCMotor
+            DRIVE_MOTOR = DCMotor.getKrakenX60(1),
+            STEER_MOTOR = DCMotor.getFalcon500(1);
+
+    /**
+     * numbers imported from {@link TunerConstants}
+     * TODO: for REV chassis, replace them with actual numbers
+     * */
+    public static final double
+            WHEEL_RADIUS_METERS = Units.inchesToMeters(2),
+            DRIVE_GEAR_RATIO = 5.9,
+            STEER_GEAR_RATIO = 21,
+            STEER_FRICTION_VOLTAGE = 0.15,
+            DRIVE_FRICTION_VOLTAGE = 0.2,
+            STEER_INERTIA = 0.025;
+
 
     public static final Mass ROBOT_MASS = Kilograms.of(45); // robot weight with bumpers
 

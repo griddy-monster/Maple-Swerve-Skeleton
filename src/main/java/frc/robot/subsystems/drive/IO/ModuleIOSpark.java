@@ -52,25 +52,25 @@ public class ModuleIOSpark implements ModuleIO {
                 driveSparkMax = new CANSparkMax(1, MotorType.kBrushless);
                 steerSparkMax = new CANSparkMax(2, MotorType.kBrushless);
                 turnAbsoluteEncoder = new AnalogInput(0);
-                absoluteEncoderOffset = new Rotation2d(0.0); // MUST BE CALIBRATED
+                absoluteEncoderOffset = new Rotation2d(2.0); // MUST BE CALIBRATED
             }
             case 1 -> {
                 driveSparkMax = new CANSparkMax(3, MotorType.kBrushless);
                 steerSparkMax = new CANSparkMax(4, MotorType.kBrushless);
                 turnAbsoluteEncoder = new AnalogInput(1);
-                absoluteEncoderOffset = new Rotation2d(0.0); // MUST BE CALIBRATED
+                absoluteEncoderOffset = new Rotation2d(4.0); // MUST BE CALIBRATED
             }
             case 2 -> {
                 driveSparkMax = new CANSparkMax(5, MotorType.kBrushless);
                 steerSparkMax = new CANSparkMax(6, MotorType.kBrushless);
                 turnAbsoluteEncoder = new AnalogInput(2);
-                absoluteEncoderOffset = new Rotation2d(0.0); // MUST BE CALIBRATED
+                absoluteEncoderOffset = new Rotation2d(6.0); // MUST BE CALIBRATED
             }
             case 3 -> {
                 driveSparkMax = new CANSparkMax(7, MotorType.kBrushless);
                 steerSparkMax = new CANSparkMax(8, MotorType.kBrushless);
                 turnAbsoluteEncoder = new AnalogInput(3);
-                absoluteEncoderOffset = new Rotation2d(0.0); // MUST BE CALIBRATED
+                absoluteEncoderOffset = new Rotation2d(8.0); // MUST BE CALIBRATED
             }
             default -> throw new RuntimeException("Invalid module index");
         }
