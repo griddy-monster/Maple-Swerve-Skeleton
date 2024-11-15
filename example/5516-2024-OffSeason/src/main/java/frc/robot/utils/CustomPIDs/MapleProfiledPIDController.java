@@ -6,9 +6,7 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile;
 
 public class MapleProfiledPIDController extends ProfiledPIDController {
     private final MaplePIDController.MaplePIDConfig pidConfig;
-
-    public MapleProfiledPIDController(
-            MaplePIDController.MaplePIDConfig pidConfig, TrapezoidProfile.Constraints constraints) {
+    public MapleProfiledPIDController(MaplePIDController.MaplePIDConfig pidConfig, TrapezoidProfile.Constraints constraints) {
         super(pidConfig.Kp, pidConfig.Ki, pidConfig.Kd, constraints);
         this.pidConfig = pidConfig;
     }

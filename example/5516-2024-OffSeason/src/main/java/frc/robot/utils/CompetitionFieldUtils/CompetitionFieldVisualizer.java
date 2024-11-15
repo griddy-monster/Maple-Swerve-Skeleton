@@ -6,27 +6,28 @@ import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.subsystems.drive.HolonomicDriveSubsystem;
 import frc.robot.utils.CompetitionFieldUtils.Objects.GamePieceOnFlyDisplay;
-import java.util.*;
+import frc.robot.utils.CompetitionFieldUtils.Simulations.SwerveDriveSimulation;
 import org.littletonrobotics.junction.Logger;
 
+import java.util.*;
+import java.util.function.Supplier;
+
 /**
- * visualizes a competition field on dashboard & Advantage Scope displays robots, opponent robots and game pieces on
- * field the source of these information should either be captured from a vision system during a real competition or by
- * the Maple Physics Simulation during a simulated competition
- */
+ * visualizes a competition field on dashboard & Advantage Scope
+ * displays robots, opponent robots and game pieces on field
+ * the source of these information should either be captured from a vision system during a real competition
+ * or by the Maple Physics Simulation during a simulated competition
+ * */
 public class CompetitionFieldVisualizer {
     public interface ObjectOnFieldDisplay {
         String getTypeName();
-
         Pose3d getPose3d();
     }
 
     public interface Object2dOnFieldDisplay extends ObjectOnFieldDisplay {
         Pose2d getObjectOnFieldPose2d();
-
         @Override
         String getTypeName();
-
         @Override
         default Pose3d getPose3d() {
             return new Pose3d(getObjectOnFieldPose2d());
@@ -37,21 +38,12 @@ public class CompetitionFieldVisualizer {
     private final Map<String, Set<GamePieceOnFlyDisplay>> gamePiecesOnFlyDisplayWithGivenType;
     public final Object2dOnFieldDisplay mainRobot;
     private final Field2d dashboardField2d;
-
     public CompetitionFieldVisualizer(HolonomicDriveSubsystem driveSubsystem) {
         this(new CompetitionFieldVisualizer.Object2dOnFieldDisplay() {
-            @Override
-            public Pose2d getObjectOnFieldPose2d() {
-                return driveSubsystem.getPose();
-            }
-
-            @Override
-            public String getTypeName() {
-                return "Robot";
-            }
+            @Override public Pose2d getObjectOnFieldPose2d() {return driveSubsystem.getPose();}
+            @Override public String getTypeName() {return "Robot";}
         });
     }
-
     public CompetitionFieldVisualizer(Object2dOnFieldDisplay mainRobot) {
         this.mainRobot = mainRobot;
         this.objectsOnFieldWithGivenType = new HashMap<>();
@@ -68,8 +60,10 @@ public class CompetitionFieldVisualizer {
     }
 
     public ObjectOnFieldDisplay deleteObject(ObjectOnFieldDisplay object) {
-        if (!objectsOnFieldWithGivenType.containsKey(object.getTypeName())) return null;
-        if (objectsOnFieldWithGivenType.get(object.getTypeName()).remove(object)) return object;
+        if (!objectsOnFieldWithGivenType.containsKey(object.getTypeName()))
+            return null;
+        if (objectsOnFieldWithGivenType.get(object.getTypeName()).remove(object))
+            return object;
         return null;
     }
 
@@ -77,14 +71,13 @@ public class CompetitionFieldVisualizer {
         addObject(gamePieceOnFlyDisplay);
         if (!gamePiecesOnFlyDisplayWithGivenType.containsKey(gamePieceOnFlyDisplay.getTypeName()))
             gamePiecesOnFlyDisplayWithGivenType.put(gamePieceOnFlyDisplay.getTypeName(), new HashSet<>());
-        gamePiecesOnFlyDisplayWithGivenType
-                .get(gamePieceOnFlyDisplay.getTypeName())
-                .add(gamePieceOnFlyDisplay);
+        gamePiecesOnFlyDisplayWithGivenType.get(gamePieceOnFlyDisplay.getTypeName()).add(gamePieceOnFlyDisplay);
         return gamePieceOnFlyDisplay;
     }
 
     public Set<ObjectOnFieldDisplay> clearObjectsWithGivenType(String typeName) {
-        if (!objectsOnFieldWithGivenType.containsKey(typeName)) return new HashSet<>();
+        if (!objectsOnFieldWithGivenType.containsKey(typeName))
+            return new HashSet<>();
         final Set<ObjectOnFieldDisplay> originalSet = objectsOnFieldWithGivenType.get(typeName);
         objectsOnFieldWithGivenType.put(typeName, new HashSet<>());
         return originalSet;
@@ -96,7 +89,7 @@ public class CompetitionFieldVisualizer {
 
     public void updateObjectsToDashboardAndTelemetry() {
         removeGamePiecesOnFlyIfReachedTarget();
-        for (String typeName : objectsOnFieldWithGivenType.keySet()) {
+        for (String typeName: objectsOnFieldWithGivenType.keySet()) {
             final Set<ObjectOnFieldDisplay> objects = objectsOnFieldWithGivenType.get(typeName);
             Logger.recordOutput("/Field/" + typeName, getPose3ds(objects));
         }
@@ -106,9 +99,10 @@ public class CompetitionFieldVisualizer {
     }
 
     private void removeGamePiecesOnFlyIfReachedTarget() {
-        for (Set<GamePieceOnFlyDisplay> gamePieceSet : gamePiecesOnFlyDisplayWithGivenType.values())
+        for (Set<GamePieceOnFlyDisplay> gamePieceSet: gamePiecesOnFlyDisplayWithGivenType.values())
             gamePieceSet.removeIf(gamePieceOnFlyDisplay -> {
-                if (gamePieceOnFlyDisplay.isReached()) deleteObject(gamePieceOnFlyDisplay);
+                if (gamePieceOnFlyDisplay.isReached())
+                    deleteObject(gamePieceOnFlyDisplay);
                 return gamePieceOnFlyDisplay.isReached();
             });
     }
@@ -116,7 +110,7 @@ public class CompetitionFieldVisualizer {
     private static List<Pose2d> getPose2ds(Set<ObjectOnFieldDisplay> objects) {
         final List<Pose2d> pose2dList = new ArrayList<>();
 
-        for (ObjectOnFieldDisplay object : objects)
+        for (ObjectOnFieldDisplay object:objects)
             pose2dList.add(object.getPose3d().toPose2d());
         return pose2dList;
     }

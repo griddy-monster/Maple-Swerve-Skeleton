@@ -6,9 +6,10 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.RobotContainer;
 import frc.robot.commands.drive.FollowPathFaceToTarget;
-import java.io.IOException;
 import org.ironmaple.utils.FieldMirroringUtils;
 import org.json.simple.parser.ParseException;
+
+import java.io.IOException;
 
 public class ExampleFaceToTarget implements Auto {
     @Override
@@ -17,7 +18,8 @@ public class ExampleFaceToTarget implements Auto {
                 PathPlannerPath.fromPathFile("Test Face To Target"),
                 0,
                 FieldMirroringUtils.SPEAKER_POSITION_SUPPLIER,
-                null);
+                null
+        );
     }
 
     @Override
