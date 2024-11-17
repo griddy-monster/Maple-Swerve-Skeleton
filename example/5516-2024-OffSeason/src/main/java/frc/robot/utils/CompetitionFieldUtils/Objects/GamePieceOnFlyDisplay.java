@@ -9,8 +9,7 @@ public abstract class GamePieceOnFlyDisplay implements CompetitionFieldVisualize
     protected final double flightTimeSeconds, startTimeSeconds;
     protected final Rotation3d gamePieceRotation;
 
-    public GamePieceOnFlyDisplay(
-            Translation3d shooterPosition, Translation3d targetedPosition, double flightTimeSeconds) {
+    public GamePieceOnFlyDisplay(Translation3d shooterPosition, Translation3d targetedPosition, double flightTimeSeconds) {
         this.shooterPosition = shooterPosition;
         this.targetedPosition = targetedPosition;
         this.flightTimeSeconds = flightTimeSeconds;
@@ -18,10 +17,7 @@ public abstract class GamePieceOnFlyDisplay implements CompetitionFieldVisualize
 
         final Translation3d displacementToTarget = targetedPosition.minus(shooterPosition);
         final double yaw = displacementToTarget.toTranslation2d().getAngle().getRadians(),
-                pitch =
-                        -Math.atan2(
-                                displacementToTarget.getZ(),
-                                displacementToTarget.toTranslation2d().getNorm());
+                pitch = -Math.atan2(displacementToTarget.getZ(), displacementToTarget.toTranslation2d().getNorm());
         this.gamePieceRotation = new Rotation3d(0, pitch, yaw);
     }
 

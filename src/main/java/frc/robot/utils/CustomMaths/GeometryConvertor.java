@@ -8,7 +8,9 @@ import org.dyn4j.geometry.Rotation;
 import org.dyn4j.geometry.Transform;
 import org.dyn4j.geometry.Vector2;
 
-/** utils to convert between WPILIB and dyn4j geometry classes */
+/**
+ * utils to convert between WPILIB and dyn4j geometry classes
+ * */
 public class GeometryConvertor {
     public static Vector2 toDyn4jVector2(Translation2d wpilibTranslation2d) {
         return new Vector2(wpilibTranslation2d.getX(), wpilibTranslation2d.getY());
@@ -36,7 +38,8 @@ public class GeometryConvertor {
     public static Pose2d toWpilibPose2d(Transform dyn4jTransform) {
         return new Pose2d(
                 toWpilibTranslation2d(dyn4jTransform.getTranslation()),
-                toWpilibRotation2d(dyn4jTransform.getRotation()));
+                toWpilibRotation2d(dyn4jTransform.getRotation())
+        );
     }
 
     public static Vector2 toDyn4jLinearVelocity(ChassisSpeeds wpilibChassisSpeeds) {
@@ -44,6 +47,10 @@ public class GeometryConvertor {
     }
 
     public static ChassisSpeeds toWpilibChassisSpeeds(Vector2 dyn4jLinearVelocity, double angularVelocityRadPerSec) {
-        return new ChassisSpeeds(dyn4jLinearVelocity.x, dyn4jLinearVelocity.y, angularVelocityRadPerSec);
+        return new ChassisSpeeds(
+                dyn4jLinearVelocity.x,
+                dyn4jLinearVelocity.y,
+                angularVelocityRadPerSec
+        );
     }
 }

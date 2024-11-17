@@ -12,7 +12,6 @@ public class PrepareToAmp extends Command {
     private final LEDStatusLight statusLight;
     private static final LEDAnimation PREPARING_AMP = new LEDAnimation.Charging(255, 0, 255, 2), // purple charging
             READY_TO_AMP = new LEDAnimation.ShowColor(0, 255, 0); // show color
-
     public PrepareToAmp(Pitch pitch, FlyWheels flyWheels, LEDStatusLight statusLight) {
         super();
         this.pitch = pitch;
@@ -22,7 +21,6 @@ public class PrepareToAmp extends Command {
     }
 
     private boolean running = false;
-
     @Override
     public void initialize() {
         running = false;

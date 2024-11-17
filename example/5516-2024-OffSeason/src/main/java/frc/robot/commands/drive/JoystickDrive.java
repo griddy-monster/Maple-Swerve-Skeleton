@@ -1,8 +1,5 @@
 package frc.robot.commands.drive;
 
-import static frc.robot.constants.JoystickConfigs.*;
-import static frc.robot.subsystems.drive.HolonomicDriveSubsystem.isZero;
-
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -12,11 +9,15 @@ import frc.robot.Robot;
 import frc.robot.constants.DriveControlLoops;
 import frc.robot.constants.FieldConstants;
 import frc.robot.subsystems.drive.HolonomicDriveSubsystem;
-import frc.robot.utils.CustomPIDs.MaplePIDController;
 import frc.robot.utils.MapleJoystickDriveInput;
+import frc.robot.utils.CustomPIDs.MaplePIDController;
+import org.littletonrobotics.junction.Logger;
+
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
-import org.littletonrobotics.junction.Logger;
+
+import static frc.robot.subsystems.drive.HolonomicDriveSubsystem.isZero;
+import static frc.robot.constants.JoystickConfigs.*;
 
 public class JoystickDrive extends Command {
     protected MapleJoystickDriveInput input;
@@ -30,12 +31,7 @@ public class JoystickDrive extends Command {
     protected Rotation2d currentRotationMaintenanceSetpoint;
 
     private double translationalSensitivity, rotationalSensitivity;
-
-    public JoystickDrive(
-            MapleJoystickDriveInput input,
-            BooleanSupplier useDriverStationCentricSwitch,
-            Supplier<Integer> povButtonSupplier,
-            HolonomicDriveSubsystem driveSubsystem) {
+    public JoystickDrive(MapleJoystickDriveInput input, BooleanSupplier useDriverStationCentricSwitch, Supplier<Integer> povButtonSupplier, HolonomicDriveSubsystem driveSubsystem) {
         super();
         this.input = input;
         this.useDriverStationCentricSwitch = useDriverStationCentricSwitch;
@@ -67,39 +63,47 @@ public class JoystickDrive extends Command {
 
         final ChassisSpeeds newestPilotInputSpeed = input.getJoystickChassisSpeeds(
                 driveSubsystem.getChassisMaxLinearVelocityMetersPerSec() * translationalSensitivity,
-                driveSubsystem.getChassisMaxAngularVelocity() * rotationalSensitivity);
+                driveSubsystem.getChassisMaxAngularVelocity() * rotationalSensitivity
+        );
         currentPilotInputSpeeds = driveSubsystem.constrainAcceleration(
-                currentPilotInputSpeeds, newestPilotInputSpeed, Robot.defaultPeriodSecs);
+                currentPilotInputSpeeds,
+                newestPilotInputSpeed,
+                Robot.defaultPeriodSecs
+        );
 
-        if (Math.abs(currentPilotInputSpeeds.omegaRadiansPerSecond) > 0.05) previousRotationalInputTimer.reset();
+        if (Math.abs(currentPilotInputSpeeds.omegaRadiansPerSecond) > 0.05)
+            previousRotationalInputTimer.reset();
 
         if (povButtonSupplier.get() != -1)
             setCurrentRotationalMaintenance(
-                    FieldConstants.getDriverStationFacing().minus(Rotation2d.fromDegrees(povButtonSupplier.get())));
+                    FieldConstants
+                            .getDriverStationFacing()
+                            .minus(Rotation2d.fromDegrees(povButtonSupplier.get()))
+            );
 
         final ChassisSpeeds chassisSpeedsWithRotationMaintenance;
         final double rotationCorrectionAngularVelocity = chassisRotationController.calculate(
-                driveSubsystem.getRawGyroYaw().getRadians(), currentRotationMaintenanceSetpoint.getRadians());
+                driveSubsystem.getRawGyroYaw().getRadians(),
+                currentRotationMaintenanceSetpoint.getRadians()
+        );
         Logger.recordOutput("previousRotationalInputTimer.get()", previousRotationalInputTimer.get());
         if (previousRotationalInputTimer.get() > TIME_ACTIVATE_ROTATION_MAINTENANCE_AFTER_NO_ROTATIONAL_INPUT_SECONDS)
             chassisSpeedsWithRotationMaintenance = new ChassisSpeeds(
-                    currentPilotInputSpeeds.vxMetersPerSecond,
-                    currentPilotInputSpeeds.vyMetersPerSecond,
-                    rotationCorrectionAngularVelocity);
+                    currentPilotInputSpeeds.vxMetersPerSecond, currentPilotInputSpeeds.vyMetersPerSecond,
+                    rotationCorrectionAngularVelocity
+            );
         else {
             chassisSpeedsWithRotationMaintenance = currentPilotInputSpeeds;
             Logger.recordOutput("pilot input speeds", currentPilotInputSpeeds);
             currentRotationMaintenanceSetpoint = driveSubsystem.getRawGyroYaw();
         }
 
-        Logger.recordOutput(
-                "JoystickDrive/rotation maintenance set-point (deg)", currentRotationMaintenanceSetpoint.getDegrees());
+        Logger.recordOutput("JoystickDrive/rotation maintenance set-point (deg)", currentRotationMaintenanceSetpoint.getDegrees());
         Logger.recordOutput("JoystickDrive/previous rotational input time", previousRotationalInputTimer.get());
-        Logger.recordOutput(
-                "JoystickDrive/rotation closed loop velocity (deg per sec)",
-                Math.toDegrees(rotationCorrectionAngularVelocity));
+        Logger.recordOutput("JoystickDrive/rotation closed loop velocity (deg per sec)", Math.toDegrees(rotationCorrectionAngularVelocity));
 
-        if (!isZero(chassisSpeedsWithRotationMaintenance)) previousChassisUsageTimer.reset();
+        if (!isZero(chassisSpeedsWithRotationMaintenance))
+            previousChassisUsageTimer.reset();
         Logger.recordOutput("JoystickDrive/current pilot input speeds", currentPilotInputSpeeds.toString());
 
         if (previousChassisUsageTimer.hasElapsed(NON_USAGE_TIME_RESET_WHEELS)) {
@@ -109,12 +113,12 @@ public class JoystickDrive extends Command {
 
         if (useDriverStationCentricSwitch.getAsBoolean())
             driveSubsystem.runDriverStationCentricChassisSpeeds(chassisSpeedsWithRotationMaintenance);
-        else driveSubsystem.runRobotCentricChassisSpeeds(chassisSpeedsWithRotationMaintenance);
+        else
+            driveSubsystem.runRobotCentricChassisSpeeds(chassisSpeedsWithRotationMaintenance);
     }
 
     public void setCurrentRotationalMaintenance(Rotation2d setPointAbsoluteFacing) {
-        final Rotation2d gyroReadingBiasFromActualFacing =
-                driveSubsystem.getRawGyroYaw().minus(driveSubsystem.getFacing());
+        final Rotation2d gyroReadingBiasFromActualFacing = driveSubsystem.getRawGyroYaw().minus(driveSubsystem.getFacing());
         this.currentRotationMaintenanceSetpoint = setPointAbsoluteFacing.rotateBy(gyroReadingBiasFromActualFacing);
     }
 

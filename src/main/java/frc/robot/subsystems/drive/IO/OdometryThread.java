@@ -1,19 +1,20 @@
 package frc.robot.subsystems.drive.IO;
 
-import static frc.robot.constants.DriveTrainConstants.*;
-
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import frc.robot.Robot;
 import frc.robot.subsystems.drive.OdometryThreadReal;
 import frc.robot.subsystems.drive.SwerveDrive;
 import frc.robot.utils.MapleTimeUtils;
+import org.littletonrobotics.junction.AutoLog;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.function.Supplier;
-import org.littletonrobotics.junction.AutoLog;
+
+import static frc.robot.constants.DriveTrainConstants.*;
 
 public interface OdometryThread {
     final class OdometryDoubleInput {
@@ -32,13 +33,11 @@ public interface OdometryThread {
 
     List<OdometryDoubleInput> registeredInputs = new ArrayList<>();
     List<BaseStatusSignal> registeredStatusSignals = new ArrayList<>();
-
     static Queue<Double> registerSignalInput(StatusSignal<Double> signal) {
         signal.setUpdateFrequency(ODOMETRY_FREQUENCY, ODOMETRY_WAIT_TIMEOUT_SECONDS);
         registeredStatusSignals.add(signal);
         return registerInput(signal.asSupplier());
     }
-
     static Queue<Double> registerInput(Supplier<Double> supplier) {
         final OdometryDoubleInput odometryDoubleInput = new OdometryDoubleInput(supplier);
         registeredInputs.add(odometryDoubleInput);
@@ -50,7 +49,8 @@ public interface OdometryThread {
             case REAL -> new OdometryThreadReal(
                     type,
                     registeredInputs.toArray(new OdometryDoubleInput[0]),
-                    registeredStatusSignals.toArray(new BaseStatusSignal[0]));
+                    registeredStatusSignals.toArray(new BaseStatusSignal[0])
+            );
             case SIM -> new OdometryThreadSim();
             case REPLAY -> inputs -> {};
         };
@@ -74,8 +74,8 @@ public interface OdometryThread {
         public void updateInputs(OdometryThreadInputs inputs) {
             inputs.measurementTimeStamps = new double[SIMULATION_TICKS_IN_1_PERIOD];
             final double robotStartingTimeStamps = MapleTimeUtils.getLogTimeSeconds(),
-                    iterationPeriodSeconds = Robot.defaultPeriodSecs / SIMULATION_TICKS_IN_1_PERIOD;
-            for (int i = 0; i < SIMULATION_TICKS_IN_1_PERIOD; i++)
+                    iterationPeriodSeconds = Robot.defaultPeriodSecs/SIMULATION_TICKS_IN_1_PERIOD;
+            for (int i =0; i < SIMULATION_TICKS_IN_1_PERIOD; i++)
                 inputs.measurementTimeStamps[i] = robotStartingTimeStamps + i * iterationPeriodSeconds;
         }
     }
